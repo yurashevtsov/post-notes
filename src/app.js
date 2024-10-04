@@ -17,6 +17,7 @@ app.all("*", (req, res, next) => {
   });
 });
 
+// todo: add proper error handling
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.log(err);
