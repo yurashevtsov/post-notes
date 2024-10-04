@@ -11,8 +11,6 @@ const createUserSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(4).required(),
   avatar: Joi.string().min(5).max(30),
-  // ? make confirmPassword and validate it here but do nothing with it anywhere else?
-  // confirmPassword: Joi.string().Joi.ref("password").required(),
 });
 
 const updateUserSchema = Joi.object({
@@ -22,8 +20,14 @@ const updateUserSchema = Joi.object({
   avatar: Joi.string().min(5).max(30),
 });
 
+const loginUserSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(4).required(),
+});
+
 module.exports = {
   createUserSchema,
   updateUserSchema,
-  idParamSchema
+  loginUserSchema,
+  idParamSchema,
 };

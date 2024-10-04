@@ -8,6 +8,7 @@ const {
   createUserSchema,
   updateUserSchema,
   idParamSchema,
+  loginUserSchema,
 } = require("./userValidateSchema.js");
 
 // validating id parameter for any path that has req.params.id
@@ -23,7 +24,11 @@ routerInstance.post(
   joiMiddleware.validateJoiSchema(createUserSchema),
   userController.signup
 );
-routerInstance.post("/login", userController.login);
+routerInstance.post(
+  "/login",
+  joiMiddleware.validateJoiSchema(loginUserSchema),
+  userController.login
+);
 
 // for authorized users only, will be applied to all routes below
 // routerInstance.use(authorizationMiddleware.protect); // JWT Only authorization
