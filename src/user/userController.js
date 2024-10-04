@@ -4,6 +4,7 @@ const catchAsync = require("@src/utils/catchAsync.js");
 const jwtService = require("@src/auth/jwt.service.js");
 const passwordService = require("@src/auth/password.service.js");
 const userService = require("./userService.js");
+const AppError = require("@src/utils/appError.js");
 
 async function signup(req, res) {
   const user = await userService.createUser(
@@ -29,7 +30,7 @@ async function login(req, res, next) {
     !user ||
     !(await passwordService.isValidPassword(req.body.password, user.password))
   ) {
-    return next(new Error("Invalid email or password"));
+    return next(new AppError("Invalid credentials", 403));
   }
 
   const token = jwtService.encodeToken(user.id);

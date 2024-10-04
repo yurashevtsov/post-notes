@@ -4,6 +4,7 @@ const catchAsync = require("@src/utils/catchAsync.js");
 const jwtService = require("./jwt.service");
 const userService = require("@src/user/userService.js");
 const passwordService = require("./password.service.js");
+const AppError = require("@src/utils/appError.js");
 
 // Authenticate by JWT TOKEN
 async function tokenAuthHandler(req, res, next) {
@@ -11,8 +12,9 @@ async function tokenAuthHandler(req, res, next) {
   // get the token
   const token = req.headers.authorization.split(" ")[1];
 
+  // just for a good measure
   if (!token) {
-    return next(new Error("Unauthorized"));
+    return next(new AppError("Unauthorized.", 401));
   }
 
   // decode the token
@@ -23,7 +25,7 @@ async function tokenAuthHandler(req, res, next) {
   const user = await userService.getUserById(payload.id);
 
   if (!user) {
-    return next(new Error("User is no longer exists.Log in again."));
+    return next(new AppError("User is no longer exists.Log in again.", 403));
   }
 
   // because jwt library uses seconds, not milliseconds
@@ -33,7 +35,7 @@ async function tokenAuthHandler(req, res, next) {
 
   if (userUpdatedAt > tokenIssuedAt) {
     return next(
-      new Error("User recently changed password. Please, log in again.")
+      new AppError("User recently changed password.Log in again.", 403)
     );
   }
 
@@ -60,7 +62,7 @@ async function basicAuthHandler(req, res, next) {
     !user ||
     !(await passwordService.isValidPassword(password, user.password))
   ) {
-    return next(new Error("Invalid username or password"));
+    return next(new AppError("Invalid username or password", 403));
   }
 
   req.user = user;
@@ -69,17 +71,17 @@ async function basicAuthHandler(req, res, next) {
   next();
 }
 
-function protectHandler(req, res, next) {
+async function protectHandler(req, res, next) {
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Basic")
   ) {
-    return basicAuthHandler(req, res, next);
+    return await basicAuthHandler(req, res, next);
   } else if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
-    return tokenAuthHandler(req, res, next);
+    return await tokenAuthHandler(req, res, next);
   }
 
   // will reach it if no authentication info was provided

@@ -1,6 +1,7 @@
 "use strict";
 
 const Note = require("./noteModel");
+const AppError = require("@src/utils/appError.js");
 
 /**
  *
@@ -16,6 +17,10 @@ async function getUserNotes(query, userId) {
     order: [[query.sortBy, query.sortDirection]],
   });
 
+  if (!notes) {
+    throw new AppError("Something went wrong trying to fetch notes.", 500);
+  }
+
   return notes;
 }
 
@@ -26,12 +31,18 @@ async function getUserNotes(query, userId) {
  * @returns {object} created sequelize note instance
  */
 async function getOneUserNote(noteId, userId) {
-  return await Note.findOne({
+  const note = await Note.findOne({
     where: {
       userId,
       id: noteId,
     },
   });
+
+  if (!note) {
+    throw new AppError("Note with that id is not found.", 404);
+  }
+
+  return note;
 }
 
 /**
@@ -48,11 +59,15 @@ async function createUserNote(reqBody, userId) {
     fields: ["userId", "name", "description", "color"],
   });
 
+  if (!note) {
+    throw new AppError("Failed to create a note.", 500);
+  }
+
   return note;
 }
 
 /**
- *
+ * Updates a note
  * @param {object} reqBody Object with req.body data
  * @param {number} noteId id of the note to be updated
  * @param {number} userId note owner
@@ -66,7 +81,7 @@ async function updateUserNote(reqBody, noteId, userId) {
   });
 
   if (!note) {
-    throw new Error("Note with that id is not found.");
+    throw new AppError("Note with that id is not found.", 404);
   }
 
   note.set(reqBody);
@@ -75,7 +90,7 @@ async function updateUserNote(reqBody, noteId, userId) {
 }
 
 /**
- *
+ * Deletes user note from the database.
  * @param {number} userId note id to be deleted
  * @param {number} userId note owne
  */

@@ -1,6 +1,7 @@
 "use strict";
 
 const User = require("./userModel");
+const AppError = require("@src/utils/appError.js");
 
 /**
  *Returns an array with 2 values. 
@@ -18,14 +19,15 @@ async function createUser(reqBody) {
   });
 
   if (!created) {
-    throw new Error("User with that email already exists.");
+    throw new AppError("User with that email already exists.", 400);
   }
 
   return user;
 }
 
+// not throwing errors here, auth middleware will do
 async function getUserByEmailWithPassword(userEmail) {
-  return await User.findOne({
+  const user = await User.findOne({
     attributes: {
       include: ["password"],
     },
@@ -33,10 +35,13 @@ async function getUserByEmailWithPassword(userEmail) {
       email: userEmail,
     },
   });
+
+  return user;
 }
 
+// not throwing errors here, auth middleware will do
 async function getUserByUsernameWithPassword(username) {
-  return await User.findOne({
+  const user = await User.findOne({
     attributes: {
       include: ["password"],
     },
@@ -44,18 +49,32 @@ async function getUserByUsernameWithPassword(username) {
       username: username,
     },
   });
+
+  return user;
 }
 
 async function getUserById(userId) {
-  return await User.findOne({
+  const user = await User.findOne({
     where: {
       id: userId,
     },
   });
+
+  if (!user) {
+    throw new AppError("User is not found.", 404);
+  }
+
+  return user;
 }
 
 async function getAllUsers() {
-  return await User.findAll();
+  const users = await User.findAll();
+
+  if (!users) {
+    throw new AppError("Something went wrong.", 500);
+  }
+
+  return users;
 }
 
 // we dont allow to change email address in this route
@@ -63,7 +82,7 @@ async function updateUserById(userId, userData, ...allowedFields) {
   const user = await getUserById(userId);
 
   if (!user) {
-    throw new Error("User with that id is not found.");
+    throw new Error("User is not found.");
   }
 
   user.set(userData);
@@ -74,11 +93,13 @@ async function updateUserById(userId, userData, ...allowedFields) {
 }
 
 async function deleteUserById(userId) {
-  return await User.destroy({
+  await User.destroy({
     where: {
       id: userId,
     },
   });
+
+  return null;
 }
 
 module.exports = {

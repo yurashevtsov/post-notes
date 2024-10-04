@@ -4,27 +4,20 @@ const express = require("express");
 const app = express();
 const userRouter = require("@src/user/userRouter.js");
 const noteRouter = require("@src/note/noteRouter.js");
+const AppError = require("@src/utils/appError.js");
+const globalErrorHandler = require("@src/utils/globalErrorHandler.js");
 // body parser
 app.use(express.json());
 
 app.use("/api/users", userRouter);
 app.use("/api/notes", noteRouter);
 
-// eslint-disable-next-line no-unused-vars
+// 404 route handler, if route is not found, it will
 app.all("*", (req, res, next) => {
-  res.status(404).send({
-    message: `${req.originalUrl} is not found on this server`,
-  });
+  next(new AppError(`${req.originalUrl} is not found on this server`, 404));
 });
 
-// todo: add proper error handling
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  console.log(err);
-  res.status(500).send({
-    status: "error",
-    message: err.message || "Internal Server Error",
-  });
-});
+// handler with 4 arguments tells express its error first error handler
+app.use(globalErrorHandler);
 
 module.exports = app;

@@ -16,11 +16,11 @@ module.exports = {
 
         next();
       } catch (err) {
+        console.log(err);
         next(err);
       }
     };
   },
-
 
   /**
    * Mutates req.query after validating against Joi schema object
