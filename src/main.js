@@ -1,7 +1,7 @@
 "use strict";
 
 require("module-alias/register");
-require("@src/associations.js");
+require("@src/db/associations.js");
 const config = require("@config/index.js");
 const app = require("./app");
 const db = require("@src/db/database.js");
