@@ -1,8 +1,15 @@
 "use strict";
 
-const { HttpBaseError, HttpInternalServerError, HttpBadRequestError } = require("./httpErrors")
+const {
+  HttpBaseError,
+  HttpInternalServerError,
+  HttpBadRequestError,
+} = require("./httpErrors");
 
-const { ValidationError, UniqueConstraintError } = require("sequelize");
+const {
+  ValidationError: SequelizeValidationError,
+  UniqueConstraintError: SequelizeUniqueConstraintError,
+} = require("sequelize");
 
 module.exports = class HttpErrorFactory {
   /**
@@ -13,18 +20,17 @@ module.exports = class HttpErrorFactory {
     let result = null;
     if (fromError instanceof HttpBaseError) {
       result = fromError;
-    }
-    else { 
+    } else {
       switch (fromError.constructor) {
-        case ValidationError: {
+        case SequelizeValidationError: {
           result = new HttpBadRequestError(fromError.message);
           break;
         }
-        case UniqueConstraintError: { 
+        case SequelizeUniqueConstraintError: {
           result = new HttpBadRequestError(fromError.message);
           break;
         }
-        default: { 
+        default: {
           result = new HttpInternalServerError(fromError.message);
         }
       }

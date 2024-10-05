@@ -1,7 +1,7 @@
 "use strict";
 
 const Note = require("./noteModel");
-const AppError = require("@src/utils/appError.js");
+const { HttpNotFoundError } = require("@src/utils/httpErrors");
 
 /**
  *
@@ -16,10 +16,6 @@ async function getUserNotes(query, userId) {
     offset: (query.page - 1) * query.limit,
     order: [[query.sortBy, query.sortDirection]],
   });
-
-  if (!notes) {
-    throw new AppError("Something went wrong trying to fetch notes.", 500);
-  }
 
   return notes;
 }
@@ -39,7 +35,7 @@ async function getOneUserNote(noteId, userId) {
   });
 
   if (!note) {
-    throw new AppError("Note with that id is not found.", 404);
+    throw new HttpNotFoundError("Note with that id is not found.");
   }
 
   return note;
@@ -59,10 +55,6 @@ async function createUserNote(reqBody, userId) {
     fields: ["userId", "name", "description", "color"],
   });
 
-  if (!note) {
-    throw new AppError("Failed to create a note.", 500);
-  }
-
   return note;
 }
 
@@ -81,7 +73,7 @@ async function updateUserNote(reqBody, noteId, userId) {
   });
 
   if (!note) {
-    throw new AppError("Note with that id is not found.", 404);
+    throw new HttpNotFoundError("Note with that id is not found.");
   }
 
   note.set(reqBody);

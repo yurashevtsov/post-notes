@@ -7,13 +7,7 @@ const userService = require("./userService.js");
 const { HttpUnauthorizedError } = require("@src/utils/httpErrors");
 
 async function signup(req, res) {
-  const user = await userService.createUser(
-    req.body,
-    "username",
-    "email",
-    "password",
-    "avatar"
-  );
+  const user = await userService.createUser(req.body);
 
   const token = jwtService.encodeToken(user.id);
 
@@ -65,7 +59,7 @@ async function updateUser(req, res) {
   res.status(200).send(updatedUser);
 }
 /** Deletes a user :)
- * 
+ *
  * @param {import('express').Request<*, *, {id: number}>} req A serious request >:(
  * @param {import('express').Response} res A funny response :)
  * @returns {Promise<null>} asdqwe

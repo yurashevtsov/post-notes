@@ -1,8 +1,10 @@
 "use strict";
 
 const User = require("./userModel");
-const AppError = require("@src/utils/appError.js");
-
+const {
+  HttpNotFoundError,
+  HttpBadRequestError,
+} = require("@src/utils/httpErrors");
 /**
  *Returns an array with 2 values. 
   First value is found or created user. 
@@ -19,7 +21,7 @@ async function createUser(reqBody) {
   });
 
   if (!created) {
-    throw new AppError("User with that email already exists.", 400);
+    throw new HttpBadRequestError("User with that email already exists.");
   }
 
   return user;
@@ -61,7 +63,7 @@ async function getUserById(userId) {
   });
 
   if (!user) {
-    throw new AppError("User is not found.", 404);
+    throw new HttpNotFoundError("User is not found.");
   }
 
   return user;
@@ -69,10 +71,6 @@ async function getUserById(userId) {
 
 async function getAllUsers() {
   const users = await User.findAll();
-
-  if (!users) {
-    throw new AppError("Something went wrong.", 500);
-  }
 
   return users;
 }
@@ -82,7 +80,7 @@ async function updateUserById(userId, userData, ...allowedFields) {
   const user = await getUserById(userId);
 
   if (!user) {
-    throw new Error("User is not found.");
+    throw new HttpNotFoundError("User is not found.");
   }
 
   user.set(userData);

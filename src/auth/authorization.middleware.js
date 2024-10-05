@@ -4,7 +4,11 @@ const catchAsync = require("@src/utils/catchAsync.js");
 const jwtService = require("./jwt.service");
 const userService = require("@src/user/userService.js");
 const passwordService = require("./password.service.js");
-const AppError = require("@src/utils/appError.js");
+const {
+  HttpBadRequestError,
+  HttpUnauthorizedError,
+  HttpForbiddenError,
+} = require("@src/utils/httpErrors/index.js");
 
 // Authenticate by JWT TOKEN
 async function tokenAuthHandler(req, res, next) {
@@ -14,7 +18,7 @@ async function tokenAuthHandler(req, res, next) {
 
   // just for a good measure
   if (!token) {
-    return next(new AppError("Unauthorized.", 401));
+    return next(new HttpUnauthorizedError("Unauthorized"));
   }
 
   // decode the token
@@ -25,7 +29,7 @@ async function tokenAuthHandler(req, res, next) {
   const user = await userService.getUserById(payload.id);
 
   if (!user) {
-    return next(new AppError("User is no longer exists.Log in again.", 403));
+    next(new HttpForbiddenError("User no longer exists.Log in again."));
   }
 
   // because jwt library uses seconds, not milliseconds
@@ -34,8 +38,8 @@ async function tokenAuthHandler(req, res, next) {
   const userUpdatedAt = user.updatedAt.getTime();
 
   if (userUpdatedAt > tokenIssuedAt) {
-    return next(
-      new AppError("User recently changed password.Log in again.", 403)
+    next(
+      new HttpForbiddenError("User recently changed password.Log in again.")
     );
   }
 
@@ -62,7 +66,7 @@ async function basicAuthHandler(req, res, next) {
     !user ||
     !(await passwordService.isValidPassword(password, user.password))
   ) {
-    return next(new AppError("Invalid username or password", 403));
+    return next(new HttpBadRequestError("Invalid username or password"));
   }
 
   req.user = user;

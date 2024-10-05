@@ -2,14 +2,14 @@
 
 /** @abstract */
 class HttpBaseError extends Error {
-  message = "";
+  // message = "";
   statusCode = 0;
   constructor(...args) {
     super(...args);
-    if (this.constructor === HttpBaseError) { 
+    if (this.constructor === HttpBaseError) {
       throw new Error("Can't directly instance abstract class HttpBaseError");
     }
   }
-};
+}
 
 module.exports = HttpBaseError;
