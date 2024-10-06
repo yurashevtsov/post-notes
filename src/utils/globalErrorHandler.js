@@ -2,7 +2,6 @@
 const HttpErrorFactory = require("./httpErrorFactory");
 const config = require("@src/config");
 
-// todo: replace all AppError with proper errors
 // eslint-disable-next-line no-unused-vars
 function globalErrorHandler(err, req, res, next) {
   const actualHttpError = HttpErrorFactory.buildHttpError(err);
@@ -16,8 +15,8 @@ function globalErrorHandler(err, req, res, next) {
 }
 
 // for development purposes, I want to see original error
-function devErrorHandler(appErr, originalError, res) {
-  console.log(originalError);
+function devErrorHandler(appErr, originalErr, res) {
+  console.log(originalErr);
 
   res.status(appErr.statusCode).send(appErr.message);
 }

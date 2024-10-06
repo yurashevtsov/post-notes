@@ -4,12 +4,16 @@ const {
   HttpBaseError,
   HttpInternalServerError,
   HttpBadRequestError,
+  HttpForbiddenError,
 } = require("./httpErrors");
 
 const {
   ValidationError: SequelizeValidationError,
   UniqueConstraintError: SequelizeUniqueConstraintError,
 } = require("sequelize");
+
+const { ValidationError: JoiValidationError } = require("joi");
+const { JsonWebTokenError, TokenExpiredError } = require("jsonwebtoken");
 
 module.exports = class HttpErrorFactory {
   /**
@@ -28,6 +32,18 @@ module.exports = class HttpErrorFactory {
         }
         case SequelizeUniqueConstraintError: {
           result = new HttpBadRequestError(fromError.message);
+          break;
+        }
+        case JoiValidationError: {
+          result = new HttpBadRequestError(fromError.message);
+          break;
+        }
+        case JsonWebTokenError: {
+          result = new HttpBadRequestError(fromError.message);
+          break;
+        }
+        case TokenExpiredError: {
+          result = new HttpForbiddenError(fromError.message);
           break;
         }
         default: {
